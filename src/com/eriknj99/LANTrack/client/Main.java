@@ -115,7 +115,7 @@ public class Main {
         ArrayList<Profile> out = new ArrayList<Profile>();
 
         String response = query("LIST");
-        String[] rl = response.split("\n");
+        String[] rl = response.split("#");
 
         for(String p : rl) {
             String[] e = p.split(" ");
@@ -150,7 +150,7 @@ public class Main {
             PrintWriter out = new PrintWriter(echoSocket.getOutputStream(), true);
             BufferedReader in = new BufferedReader(new InputStreamReader(echoSocket.getInputStream()));
             out.println(request);
-            return (in.readLine());
+            return in.readLine();
         }catch(Exception e){
             e.printStackTrace();
         }

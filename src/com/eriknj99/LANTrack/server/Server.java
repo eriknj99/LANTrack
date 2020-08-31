@@ -15,6 +15,11 @@ public class Server {
     public Server(){
         profiles = loadConfig();
 
+        System.out.println("\n\nNAME\tIP");
+        for(Profile p : profiles){
+            System.out.println(p.name + "\t" + p.IP);
+        }
+
         listen();
 
     }
@@ -59,8 +64,9 @@ public class Server {
         }else if(rq[0].equals("LIST")){
             String out = "";
             for(Profile p : profiles){
-                out += p.name + " " + p.UUID + " " + p.IP + "\n";
+                out += p.name + " " + p.UUID + " " + p.IP + "#";
             }
+            System.out.println(out);
             return out;
         }
 
@@ -106,7 +112,7 @@ public class Server {
     private  void saveConfig(){
         String newConfig = "";
         for(Profile p : profiles){
-            newConfig += p.name + " " + p.UUID + " " + p.IP;
+            newConfig += p.name + " " + p.UUID + " " + p.IP+"\n";
         }
         writeConfig(newConfig);
     }
