@@ -9,19 +9,24 @@ public class Server {
 
     ArrayList<Profile> profiles;
 
-    public final int UUID_LEN = 10;
-    public final int PORT = 3333;
+    private int UUID_LEN = 10;
+    private int PORT = 3333;
 
     public Server(){
         profiles = loadConfig();
 
-        System.out.println("\n\nNAME\tIP");
-        for(Profile p : profiles){
-            System.out.println(p.name + "\t" + p.IP);
-        }
+        printListings();
 
         listen();
 
+    }
+
+    public void printListings(){
+        System.out.println("----LISTINGS----");
+        System.out.println("NAME\tIP\t\t\tUUID");
+        for(Profile p : profiles){
+            System.out.println(p.name + "\t" + p.IP + "\t" + p.UUID);
+        }
     }
 
     private void listen(){
@@ -40,13 +45,29 @@ public class Server {
 
     private String process_request(String request){
 
-        System.out.println("Processing Request : " + request);
+        System.out.println("RECEIVE >> " + request);
 
         String[] rq = request.split(" ");
 
         if(rq[0].equals("REG_CLIENT")){
+
+            System.out.print("\tCLIENT_REG -> DUPLICATE_NAME_CHECK -> ");
+            for(Profile p : profiles){
+                if(p.name.equals(rq[1])){
+                    System.out.println("FAIL");
+                    return "FAIL";
+                }
+            }
+            System.out.println("PASS");
+
             Profile p = new Profile(rq[1],genUUID(),rq[2]);
             profiles.add(p);
+
+            System.out.println("\tCLIENT_REG -> SUCCESS");
+            System.out.println("\t\tNAME -> " + p.name);
+            System.out.println("\t\tUUID -> " + p.UUID);
+            System.out.println("\t\tIP   -> " + p.IP);
+
             saveConfig();
             return "SUCCESS " + p.UUID;
 
@@ -55,19 +76,41 @@ public class Server {
             String ip = rq[2];
             for(Profile p : profiles){
                 if(p.UUID.equals(uuid)){
+                    System.out.println("UPDATE_IP -> SUCCESS");
+                    System.out.println("\t\tNAME -> " + p.name);
+                    System.out.println("\t\tUUID -> " + p.UUID);
+                    System.out.println("\t\tIP   -> " + p.IP + "->" + ip);
+
                     p.IP = ip;
                     saveConfig();
                     return "SUCCESS";
                 }
             }
+            System.out.println("UPDATE_IP -> FAIL");
             return "FAIL";
         }else if(rq[0].equals("LIST")){
+            System.out.println("SEND_LISTINGS -> SUCCESS");
             String out = "";
             for(Profile p : profiles){
                 out += p.name + " " + p.IP + "#";
             }
             System.out.println(out);
             return out;
+        }else if(rq[0].equals("UNREG_CLIENT")){
+            String uuid = rq[1];
+            System.out.print("UNREGISTER -> ");
+            for(int i = profiles.size() - 1; i >= 0; i--){
+                if(profiles.get(i).UUID.equals(uuid)){
+                    profiles.remove(i);
+                    System.out.println("SUCCESS");
+                    printListings();
+                    saveConfig();
+                    return "SUCCESS";
+                }
+            }
+            System.out.println("FAIL");
+
+            return "FAIL";
         }
 
         return "INVALID_REQUEST";
@@ -77,6 +120,12 @@ public class Server {
         String UUID  = "";
         for(int i = 0; i < UUID_LEN; i++){
             UUID += ""+(int)(Math.random() * 9);
+        }
+        //In the unlikely case of a collision try again.
+        for(Profile p : profiles){
+            if(p.UUID.equals(UUID)){
+                return genUUID();
+            }
         }
         return UUID;
     }

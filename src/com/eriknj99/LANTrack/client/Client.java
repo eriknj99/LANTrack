@@ -16,13 +16,12 @@ public class Client {
     private String IP;
 
 
-
     public Client(){
         IP = getIP();
         loadConfig();
     }
 
-    private void runConfigWizard(){
+    public void runConfigWizard(){
         System.out.println("---Config Wizard---");
         Scanner sc = new Scanner(System.in);
 
@@ -125,9 +124,8 @@ public class Client {
     }
 
     public boolean updateIP(){
-
+        IP = getIP();
         String response = query("UPDATE_IP " + UUID + " " + IP);
-
         return response.equals("SUCCESS");
     }
 
@@ -140,6 +138,22 @@ public class Client {
         }
 
         return "ERROR";
+    }
+
+    public boolean unregister(){
+        String response = query("UNREG_CLIENT " + UUID);
+        if(response.equals("SUCCESS")){
+            UUID = "-";
+            NAME = "-";
+            String newConfig = "HOSTNAME " + HOSTNAME + "\n" +
+                    "PORT " + PORT + "\n" +
+                    "UUID " + UUID + "\n" +
+                    "NAME " + NAME + "\n";
+
+            writeConfig(newConfig);
+            return true;
+        }
+        return false;
     }
 
     private String query(String request){
@@ -203,7 +217,7 @@ public class Client {
         String out = "";
         ArrayList<Profile> profiles = list();
 
-        out+=("\n\nNAME\tIP\t\t\tSTATUS\n");
+        out+=("NAME\tIP\t\t\tSTATUS\n");
         for(Profile p : profiles){
            out+=(p.name + "\t" + p.IP + "\t" + getHostStatus(p.IP)+"\n");
         }
