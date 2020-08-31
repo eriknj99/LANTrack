@@ -64,7 +64,7 @@ public class Server {
         }else if(rq[0].equals("LIST")){
             String out = "";
             for(Profile p : profiles){
-                out += p.name + " " + p.UUID + " " + p.IP + "#";
+                out += p.name + " " + p.IP + "#";
             }
             System.out.println(out);
             return out;
